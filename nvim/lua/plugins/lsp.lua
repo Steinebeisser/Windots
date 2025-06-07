@@ -32,6 +32,13 @@ return {
             lspconfig.lua_ls.setup({
                 capabilities = capabilities
             })
+            --lspconfig.roslyn.setup({
+                --capabilities = capabilities
+            --})
+            --vim.lsp.config("roslyn", {
+                --capabilities = capabilities
+            --})
+            --vim.lsp.enable("roslyn")
         end,
     },
 }

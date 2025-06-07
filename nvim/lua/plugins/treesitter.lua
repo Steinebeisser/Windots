@@ -6,10 +6,14 @@ return {
             --auto_install = true,
             vim.treesitter.language.register("c_sharp", "csharp"),
             ensure_installed = { "c_sharp" },
-            highlight = { enable = true }, -- Enable syntax highlighting using Tree-sitter
-            indent = { enable = true },    -- Enable indentation based on Tree-sitter
-            -- You can add other Tree-sitter modules here as needed
-            additional_vim_regex_highlighting = { "c_sharp" },
+            auto_install = true,
+            highlight = {
+                  enable = true,
+                  -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
+                  --  If you are experiencing weird indenting issues, add the language to
+                  --  the list of additional_vim_regex_highlighting and disabled languages for indent.
+                  additional_vim_regex_highlighting = { 'ruby' },
+            },
         }
     end
 }

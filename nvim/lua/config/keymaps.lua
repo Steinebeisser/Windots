@@ -1,21 +1,84 @@
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', {silent = true })
+
+local opts = { noremap = true, silent = true }
+
+-- save
+vim.keymap.set('n', '<C-s>', '<cmd> w <CR>', opts)
+
+-- no delete into buffer
+vim.keymap.set('n', 'x', '"_x', opts)
+
+vim.keymap.set('n', '<C-d>', '<C-d>zz', opts)
+vim.keymap.set('n', '<C-u>', '<C-u>zz', opts)
+
+vim.keymap.set('n', 'n', 'nzzzv', opts)
+vim.keymap.set('n', 'N', 'Nzzzv', opts)
+
+
+-- windows
+vim.keymap.set('n', '<leader>v', '<C-w>v', opts)
+vim.keymap.set('n', '<leader>h', '<C-w>s', opts)
+vim.keymap.set('n', '<leader>se', '<C-w>=v', opts)
+vim.keymap.set('n', '<leader>xs', ':close<CR>', opts)
+
+vim.keymap.set('n', '<Up>', ':resize -2<CR>', opts)
+vim.keymap.set('n', '<Down>', ':resize +2<CR>', opts)
+vim.keymap.set('n', '<Left>', ':vertical resize -2<CR>', opts)
+vim.keymap.set('n', '<Right>', ':vertical resize +2<CR>', opts)
+
+
+-- splitnav
+vim.keymap.set('n', '<C-k>', ':wincmd k<CR>', opts)
+vim.keymap.set('n', '<C-j>', ':wincmd j<CR>', opts)
+vim.keymap.set('n', '<C-h>', ':wincmd h<CR>', opts)
+vim.keymap.set('n', '<C-l>', ':wincmd l<CR>', opts)
+
+-- tabs
+vim.keymap.set('n', '<leader>to', ':tabnew<CR>', opts)
+vim.keymap.set('n', '<leader>tx', ':tabclose<CR>', opts)
+vim.keymap.set('n', '<leader>tn', ':tabn<CR>', opts)
+vim.keymap.set('n', '<leader>tp', ':tabp<CR>', opts)
+
+
+-- line wrap
+vim.keymap.set('n', '<leader>lw', '<cmd>set wrap!<CR>', opts)
+
+-- dont yank what deleted when pasting
+vim.keymap.set('v', 'p', '"_dp', opts)
+
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, opts)
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, opts)
+
 -- TELESCOPE
 local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<C-p>', builtin.find_files, {})
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+vim.keymap.set('n', '<C-p>', builtin.find_files, opts)
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, opts)
+vim.keymap.set('n', '<leader>fb', builtin.buffers, opts)
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, opts)
 vim.keymap.set('n', '<leader>fe', function()
     require("telescope").extensions.file_browser.file_browser()
-end, {})
+end, opts)
 
 
 
 -- LSP
-vim.keymap.set('n', 'K', vim.lsp.buf.hover, {})
-vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {})
-vim.keymap.set({'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, {})
+vim.keymap.set('n', 'gd', builtin.lsp_definitions, opts)
+vim.keymap.set('n', 'gr', builtin.lsp_references, opts)
+vim.keymap.set('n', 'gI', builtin.lsp_implementations, opts)
+vim.keymap.set('n', '<leader>D', builtin.lsp_type_definitions, opts)
+vim.keymap.set('n', '<leader>ds', builtin.lsp_document_symbols, opts)
+vim.keymap.set('n', '<leader>ws', builtin.lsp_dynamic_workspace_symbols, opts)
 
-
+-- Built-in LSP functions
+vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
+vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
 -- LUASNIP
 local ls = require("luasnip")
 
