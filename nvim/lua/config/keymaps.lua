@@ -1,4 +1,6 @@
-vim.opt.shell = 'powershell.exe'
+if vim.loop.os_uname().sysname == "Windows_NT" then
+  vim.opt.shell = "powershell.exe"
+end
 
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', {silent = true })
 
