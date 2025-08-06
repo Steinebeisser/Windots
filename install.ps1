@@ -1,32 +1,33 @@
-# https://github.com/lukegackle/PowerShell-Self-Elevate-Keeping-Current-Directory/blob/749d9113fac323fa659becc1ccbfdb39ceb761d8/Self%20Elevate%20Keeping%20Directory.ps1
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-        [Security.Principal.WindowsBuiltInRole] 'Administrator')
+param(
+    [string]$Mode = "default"
 )
+
+$ScriptName = ".\install.ps1"
+
+function Start-NonAdminProcess
 {
-    Write-Host "Not elevated - requesting admin privileges..."
+    Write-Host "Restarting script in NON-ADMIN mode for Scoop operations..."
     $CurrentLocation = Get-Location
-    $ScriptPath = $MyInvocation.MyCommand.Path
-    
+    $ScriptPath = "$CurrentLocation/$ScriptName"
+
     $Arguments = @(
         '-NoProfile',
         '-ExecutionPolicy Bypass',
         '-NoExit',
         '-Command',
-        "& { Set-Location '$CurrentLocation'; & '$ScriptPath' }"
+        "& { Set-Location '$CurrentLocation'; & '$ScriptPath' --no-admin }"
     )
-    
-    Start-Process -FilePath PowerShell.exe -Verb RunAs -ArgumentList $Arguments
-    Break
+
+    Start-Process -FilePath "powershell.exe" -ArgumentList $Arguments
+    exit
 }
 
-Write-Host "Running as administrator from: $(Get-Location)"
-
-if($Loc.Length -gt 1)
+function Test-Admin
 {
-    Set-Location $($Loc.Substring(1,$Loc.Length-1)).Trim()
+    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $windowsPrincipal = New-Object Security.Principal.WindowsPrincipal($currentUser)
+    return $windowsPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
-
-$DOTFILES = (Get-Location).Path
 
 function Get-NextBackupName($path)
 {
@@ -56,103 +57,137 @@ function New-Symlink
     New-Item -ItemType SymbolicLink -Path $LinkPath -Target $Target -Force
 }
 
+function Get-SymlinkSetup
+{
+    $DOTFILES = (Get-Location).Path
 
-New-Symlink -Target "$DOTFILES\nvim" -LinkPath "$env:LOCALAPPDATA\nvim"
-New-Symlink -Target "$DOTFILES\.wezterm.lua" -LinkPath "$env:USERPROFILE\.wezterm.lua"
-New-Symlink -Target "$DOTFILES\.glzr" -LinkPath "$env:USERPROFILE\.glzr"
-New-Symlink -Target "$DOTFILES\.gitconfig" -LinkPath "$env:USERPROFILE\.gitconfig"
-New-Symlink -Target "$DOTFILES\Microsoft.PowerShell_profile.ps1" -LinkPath "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-New-Symlink -Target "$DOTFILES\starship.toml" -LinkPath "$env:USERPROFILE\starship.toml"
+    New-Symlink -Target "$DOTFILES\nvim" -LinkPath "$env:LOCALAPPDATA\nvim"
+    New-Symlink -Target "$DOTFILES\.wezterm.lua" -LinkPath "$env:USERPROFILE\.wezterm.lua"
+    New-Symlink -Target "$DOTFILES\.glzr" -LinkPath "$env:USERPROFILE\.glzr"
+    New-Symlink -Target "$DOTFILES\.gitconfig" -LinkPath "$env:USERPROFILE\.gitconfig"
+    New-Symlink -Target "$DOTFILES\Microsoft.PowerShell_profile.ps1" -LinkPath "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+    New-Symlink -Target "$DOTFILES\starship.toml" -LinkPath "$env:USERPROFILE\starship.toml"
+}
 
 function Test-ScoopInstalled
 {
     return $null -ne (Get-Command scoop -ErrorAction SilentlyContinue)
 }
 
+# TODO: check if package failed to install
 function Test-ScoopPackageInstalled
 {
     param ([string]$package)
     return $null -ne ($exported.apps | Where-Object { $_.name -eq $package })
 }
 
-function Test-PwshInstalled
-{
-    $pwshPath = Get-Command pwsh -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
-    return (Test-Path $pwshPath)
+function Test-PwshInstalled {
+    return $null -ne (Get-Command pwsh -ErrorAction SilentlyContinue)
 }
 
-Write-Host "[INFO] Checking if pwsh is installed"
-if (!(Test-PwshInstalled))
+function Get-ScoopSetup
 {
-    Write-Host "[INFO] Installing PowerShell 7, using winget..."
-    winget install Microsoft.PowerShell
-} else
-{
-    Write-Host "[INFO] PowerShell 7 is already installed, checking for updates"
-    winget upgrade Microsoft.PowerShell
-}
-
-Write-Host "[INFO] Checking if Scoop is installed..."
-
-if (!(Test-ScoopInstalled))
-{
-    Write-Host "[INFO] Installing Scoop..."
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-} else
-{
-    Write-Host "[INFO] Scoop already installed"
-}
-
-Write-Host "[INFO] Updating scoop and adding extras"
-scoop bucket add extras 2>$null
-scoop bucket add versions 2>$null
-scoop update
-
-$exported = scoop export | ConvertFrom-Json
-
-$scoop_packages = @(
-    "7zip",
-    "bat",
-    "btop",
-    "coreutils",
-    "cowsay",
-    "delta",
-    "diff-so-fancy",
-    "duf",
-    "eza",
-    "fzf",
-    "gawk",
-    "glazewm",
-    "grep",
-    "lazygit",
-    "less",
-    "llvm",
-    "neofetch",
-    "neovim",
-    "pipx",
-    "ruby",
-    "starship",
-    "tokei",
-    "winfetch",
-    "mingw",
-    "nodejs",
-    "make",
-    "cmake",
-    "ninja"
-)
-
-foreach ($pkg in $scoop_packages)
-{
-    Write-Host "[INFO] Checking if $pkg is installed via scoop..."
-    if (-not (Test-ScoopPackageInstalled $pkg))
+    Write-Host "[INFO] Checking if pwsh is installed"
+    if (!(Test-PwshInstalled))
     {
-        Write-Host "[INFO] Installing $pkg via scoop..."
-        scoop install $pkg
+        Write-Host "[INFO] Installing PowerShell 7, using winget..."
+        winget install Microsoft.PowerShell
     } else
     {
-        Write-Host "[OK] $pkg is already installed."
+        Write-Host "[INFO] PowerShell 7 is already installed, checking for updates"
+        winget upgrade Microsoft.PowerShell
     }
+
+    Write-Host "[INFO] Checking if Scoop is installed..."
+    if (!(Test-ScoopInstalled))
+    {
+        Write-Host "[INFO] Installing Scoop..."
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+    } else
+    {
+        Write-Host "[INFO] Scoop already installed"
+    }
+
+    Write-Host "[INFO] Updating scoop and adding extras"
+    scoop bucket add extras 2>$null
+    scoop bucket add versions 2>$null
+    scoop update
+
+    $global:exported = scoop export | ConvertFrom-Json
+
+    $scoop_packages = @(
+        "7zip", 
+        "bat",
+        "btop",
+        "coreutils",
+        "cowsay",
+        "delta",
+        "diff-so-fancy",
+        "duf",
+        "eza",
+        "fzf",
+        "gawk",
+        "glazewm",
+        "grep",
+        "lazygit",
+        "less",
+        "llvm",
+        "neofetch",
+        "neovim",
+        "pipx",
+        "ruby",
+        "starship",
+        "tokei",
+        "winfetch",
+        "mingw",
+        "nodejs",
+        "make",
+        "cmake",
+        "ninja"
+    )
+
+    foreach ($pkg in $scoop_packages)
+    {
+        Write-Host "[INFO] Checking if $pkg is installed via scoop..."
+        if (-not (Test-ScoopPackageInstalled $pkg))
+        {
+            Write-Host "[INFO] Installing $pkg via scoop..."
+            scoop install $pkg
+        } else
+        {
+            Write-Host "[OK] $pkg is already installed."
+        }
+    }
+
+    Write-Host "[INFO] Done installing all packages, restart your terminal and launch wezterm"
 }
 
-Write-Host "[INFO] Done installing all packages, restart your terminal and launch wezterm"
+if ($Mode -eq "--no-admin")
+{
+    Get-ScoopSetup
+    exit
+}
+
+if (-not (Test-Admin))
+{
+    Write-Host "Not elevated - requesting admin privileges..."
+    $CurrentLocation = Get-Location
+    $ScriptPath = $MyInvocation.MyCommand.Path
+
+    $Arguments = @(
+        '-NoProfile',
+        '-ExecutionPolicy Bypass',
+        '-NoExit',
+        '-Command',
+        "& { Set-Location '$CurrentLocation'; & '$ScriptPath' }"
+    )
+
+    Start-Process -FilePath "powershell.exe" -Verb RunAs -ArgumentList $Arguments
+    exit
+}
+
+Write-Host "[INFO] Running as administrator, setting up symlinks..."
+Get-SymlinkSetup
+
+Start-NonAdminProcess # scoop setup
