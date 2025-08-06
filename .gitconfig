@@ -41,3 +41,6 @@
 
 [url "https://github.com"]
     insteadOf = "hgh"
+
+[gpg]
+    program = C:/Users/Paul/scoop/apps/gpg/current/bin/gpg.exe

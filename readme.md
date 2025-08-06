@@ -108,6 +108,14 @@ Then update your [.gitconfig](.gitconfig)
     signingkey = YOUR GPG KEY
 ```
 
+> [!IMPORTANT]
+> you have to edit your gpg program either using this command
+> ```
+> git config --global gpg.program "C:/Users/YOUR_USER/scoop/apps/gpg/current/bin/gpg.exe"
+>```
+> Or edit it manually or you wont be able to sign
+
+
 > or just disable gpg sign
 
 
