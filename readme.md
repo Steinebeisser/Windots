@@ -47,11 +47,11 @@ Unlock-File .\install.ps1
 
 ### GlazeWM with Zebar
 
-> [!INFO] Zebar doesnt install its Starter config if installed via Scoop so open it go into the Widget Browser and get the Starter pack or any pack that is compatible with GlazeWM
+> [!NOTE] Zebar doesnt install its Starter config if installed via Scoop so open it go into the Widget Browser and get the Starter pack or any pack that is compatible with GlazeWM
 
 ### Neovim as Editor
 
-> [!INFO] currently not possible to install roslyn automatically with Mason so Run manually inside neovim
+> [!NOTE] currently not possible to install roslyn automatically with Mason so Run manually inside neovim
 ```vim
 :MasonInstall roslyn
 ```
