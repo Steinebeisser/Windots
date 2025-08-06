@@ -136,19 +136,11 @@ $scoop_packages = @(
     "tokei",
     "winfetch",
     "mingw",
-    "fasm",
     "nodejs",
     "make",
     "cmake",
     "ninja"
 )
-
-# mingw
-# umgebungsvariablen
-# fasm
-# npm
-# LLVM maybe
-# c dinger wie ninja make cmake auch wenn nicht benutze
 
 foreach ($pkg in $scoop_packages)
 {
