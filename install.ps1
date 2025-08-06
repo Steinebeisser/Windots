@@ -81,7 +81,8 @@ function Test-ScoopPackageInstalled
     return $null -ne ($exported.apps | Where-Object { $_.name -eq $package })
 }
 
-function Test-PwshInstalled {
+function Test-PwshInstalled
+{
     return $null -ne (Get-Command pwsh -ErrorAction SilentlyContinue)
 }
 
@@ -144,7 +145,8 @@ function Get-ScoopSetup
         "nodejs",
         "make",
         "cmake",
-        "ninja"
+        "ninja",
+        "gpg"
     )
 
     foreach ($pkg in $scoop_packages)
