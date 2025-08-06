@@ -146,7 +146,8 @@ function Get-ScoopSetup
         "make",
         "cmake",
         "ninja",
-        "gpg"
+        "gpg",
+        "git"
     )
 
     foreach ($pkg in $scoop_packages)
