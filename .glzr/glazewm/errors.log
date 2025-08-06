@@ -45,3 +45,6 @@ Error: Der Vorgang wurde durch den Benutzer abgebrochen. (0x800704C7)
 [2m2025-08-06T05:20:14.753950Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
 [2m2025-08-06T05:20:17.148376Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
 [2m2025-08-06T05:20:18.208365Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T20:20:17.544276Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to execute 'zebar'.
+
+Error: Der Vorgang wurde durch den Benutzer abgebrochen. (0x800704C7)

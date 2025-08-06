@@ -1,196 +1,51 @@
-param(
-    [string]$Mode = "default"
-)
+Get-ChildItem -Recurse -Path $PSScriptRoot | Unblock-File # if downloading zip powershell scripts need to be unblocked as they are not signed
 
-$ScriptName = ".\install.ps1"
-
-function Start-NonAdminProcess
-{
-    Write-Host "Restarting script in NON-ADMIN mode for Scoop operations..."
-    $CurrentLocation = Get-Location
-    $ScriptPath = "$CurrentLocation/$ScriptName"
-
-    $Arguments = @(
-        '-NoProfile',
-        '-ExecutionPolicy Bypass',
-        '-NoExit',
-        '-Command',
-        "& { Set-Location '$CurrentLocation'; & '$ScriptPath' --no-admin }"
-    )
-
-    Start-Process -FilePath "powershell.exe" -ArgumentList $Arguments
-    exit
-}
-
-function Test-Admin
-{
-    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $windowsPrincipal = New-Object Security.Principal.WindowsPrincipal($currentUser)
-    return $windowsPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-}
-
-function Get-NextBackupName($path)
-{
-    $backupPath = "$path.bak"
-    while (Test-Path $backupPath)
-    {
-        $backupPath += ".bak"
-    }
-    return $backupPath
-}
-
-function New-Symlink
+function Start-SubScript
 {
     param (
-        [string]$Target,
-        [string]$LinkPath
+        [string]$Path,
+        [bool]$Admin = $false,
+        [bool]$UseProfile = $false
     )
 
-    if (Test-Path $LinkPath)
+    $pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
+    if ($pwsh)
     {
-        $backupPath = Get-NextBackupName $LinkPath
-        Write-Host "[$(Get-Date -f 'HH:mm:ss')] Moving existing: $LinkPath → $backupPath"
-        Move-Item -Path $LinkPath -Destination $backupPath -Force
-    }
-
-    Write-Host "[$(Get-Date -f 'HH:mm:ss')] Creating symlink: $LinkPath → $Target"
-    New-Item -ItemType SymbolicLink -Path $LinkPath -Target $Target -Force
-}
-
-function Get-SymlinkSetup
-{
-    $DOTFILES = (Get-Location).Path
-
-    New-Symlink -Target "$DOTFILES\nvim" -LinkPath "$env:LOCALAPPDATA\nvim"
-    New-Symlink -Target "$DOTFILES\.wezterm.lua" -LinkPath "$env:USERPROFILE\.wezterm.lua"
-    New-Symlink -Target "$DOTFILES\.glzr" -LinkPath "$env:USERPROFILE\.glzr"
-    New-Symlink -Target "$DOTFILES\.gitconfig" -LinkPath "$env:USERPROFILE\.gitconfig"
-    New-Symlink -Target "$DOTFILES\Microsoft.PowerShell_profile.ps1" -LinkPath "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-    New-Symlink -Target "$DOTFILES\starship.toml" -LinkPath "$env:USERPROFILE\starship.toml"
-}
-
-function Test-ScoopInstalled
-{
-    return $null -ne (Get-Command scoop -ErrorAction SilentlyContinue)
-}
-
-# TODO: check if package failed to install
-function Test-ScoopPackageInstalled
-{
-    param ([string]$package)
-    return $null -ne ($exported.apps | Where-Object { $_.name -eq $package })
-}
-
-function Test-PwshInstalled
-{
-    return $null -ne (Get-Command pwsh -ErrorAction SilentlyContinue)
-}
-
-function Get-ScoopSetup
-{
-    Write-Host "[INFO] Checking if pwsh is installed"
-    if (!(Test-PwshInstalled))
-    {
-        Write-Host "[INFO] Installing PowerShell 7, using winget..."
-        winget install Microsoft.PowerShell
+        $installed_powershell = "pwsh.exe"
     } else
     {
-        Write-Host "[INFO] PowerShell 7 is already installed, checking for updates"
-        winget upgrade Microsoft.PowerShell
+        $installed_powershell = "powershell.exe"
     }
 
-    Write-Host "[INFO] Checking if Scoop is installed..."
-    if (!(Test-ScoopInstalled))
-    {
-        Write-Host "[INFO] Installing Scoop..."
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-    } else
-    {
-        Write-Host "[INFO] Scoop already installed"
-    }
+    $escapedPath = $Path.Replace("'", "''")
 
-    Write-Host "[INFO] Updating scoop and adding extras"
-    scoop bucket add extras 2>$null
-    scoop bucket add versions 2>$null
-    scoop update
-
-    $global:exported = scoop export | ConvertFrom-Json
-
-    $scoop_packages = @(
-        "7zip", 
-        "bat",
-        "btop",
-        "coreutils",
-        "cowsay",
-        "delta",
-        "diff-so-fancy",
-        "duf",
-        "eza",
-        "fzf",
-        "gawk",
-        "glazewm",
-        "grep",
-        "lazygit",
-        "less",
-        "llvm",
-        "neofetch",
-        "neovim",
-        "pipx",
-        "ruby",
-        "starship",
-        "tokei",
-        "winfetch",
-        "mingw",
-        "nodejs",
-        "make",
-        "cmake",
-        "ninja",
-        "gpg",
-        "git"
-    )
-
-    foreach ($pkg in $scoop_packages)
-    {
-        Write-Host "[INFO] Checking if $pkg is installed via scoop..."
-        if (-not (Test-ScoopPackageInstalled $pkg))
-        {
-            Write-Host "[INFO] Installing $pkg via scoop..."
-            scoop install $pkg
-        } else
-        {
-            Write-Host "[OK] $pkg is already installed."
-        }
-    }
-
-    Write-Host "[INFO] Done installing all packages, restart your terminal and launch wezterm"
-}
-
-if ($Mode -eq "--no-admin")
-{
-    Get-ScoopSetup
-    exit
-}
-
-if (-not (Test-Admin))
-{
-    Write-Host "Not elevated - requesting admin privileges..."
-    $CurrentLocation = Get-Location
-    $ScriptPath = $MyInvocation.MyCommand.Path
-
-    $Arguments = @(
-        '-NoProfile',
-        '-ExecutionPolicy Bypass',
+    $args = @(
         '-NoExit',
-        '-Command',
-        "& { Set-Location '$CurrentLocation'; & '$ScriptPath' }"
+        '-ExecutionPolicy', 'Bypass',
+        '-Command', "Import-Module Microsoft.PowerShell.Utility; cd '$PWD'; & '$escapedPath'"
     )
 
-    Start-Process -FilePath "powershell.exe" -Verb RunAs -ArgumentList $Arguments
-    exit
+    if (! ($UseProfile))
+    {
+        $args = @('-NoProfile') + $args
+    }
+
+    if ($Admin)
+    {
+        Write-Host "Launching $Path with elevated privileges..."
+        $proc = Start-Process -FilePath $installed_powershell -ArgumentList $args -Verb RunAs -PassThru
+    } else
+    {
+        Write-Host "Launching $Path as non-elevated..."
+        $proc = Start-Process -FilePath $installed_powershell -ArgumentList $args -PassThru -ErrorAction Stop
+    }
+
+    return $proc
 }
 
-Write-Host "[INFO] Running as administrator, setting up symlinks..."
-Get-SymlinkSetup
+$procs = @()
+# $procs += Start-SubScript "$PSScriptRoot\install_scripts\install_symlinks.ps1" -Admin $true -UseProfile $false
+$procs += Start-SubScript "$PSScriptRoot\install_scripts\install_scoop.ps1"  -Admin $false -UseProfile $true
+# $procs += Start-SubScript "$PSScriptRoot\install_scripts\install_winget_and_msys2.ps1" -Admin $true -UseProfile $false
 
-Start-NonAdminProcess # scoop setup
+Write-Host "Started install tasks in parallel. Waiting for them to finish..."

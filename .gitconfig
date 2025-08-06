@@ -1,10 +1,7 @@
 [user]
     name = Paul Geisthardt
-    email = paul.geisthardt@sinc.de
-    signingkey = 91DE296B5C3703B0
-
-[credential "https://tfs.sinc.de"]
-	provider = generic
+    email = paul.geisthardt@gmx.de
+    signingkey = 84B600BF5829C049
 
 [core]
     editor = nvim
@@ -44,6 +41,3 @@
 
 [url "https://github.com"]
     insteadOf = "hgh"
-
-[gpg]
-	program = C:/Program Files (x86)/GnuPG/bin/gpg.exe

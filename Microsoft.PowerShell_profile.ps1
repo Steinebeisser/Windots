@@ -1,3 +1,6 @@
+# Import required modules for compatibility
+Import-Module -Name Microsoft.PowerShell.Utility -ErrorAction SilentlyContinue
+
 Invoke-Expression (&starship init powershell)
 $ENV:STARSHIP_CONFIG = "$HOME\starship.toml"
 
