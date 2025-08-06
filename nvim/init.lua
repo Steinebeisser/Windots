@@ -3,6 +3,7 @@ require("config.lazy")
 require("config.keymaps")
 require("config.options")
 require("config.autocmds")
+require("config.usercmds")
 
 vim.diagnostic.config({
 	virtual_text = true, -- show errors inline

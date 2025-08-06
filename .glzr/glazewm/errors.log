@@ -1,0 +1,47 @@
+[2m2025-07-05T12:17:51.182897Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to execute 'zebar'.
+
+Error: Der Vorgang wurde durch den Benutzer abgebrochen. (0x800704C7)
+[2m2025-07-07T05:27:23.747161Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Another instance of the application is already running.
+[2m2025-07-08T05:19:34.071604Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No workspace config available to activate workspace.
+[2m2025-07-08T05:20:22.612431Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-08T05:20:29.900272Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-08T05:20:44.995731Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-08T05:20:48.226528Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-08T05:20:52.393132Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-08T05:21:00.356800Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-08T05:21:02.023379Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-08T05:21:08.870943Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-08T05:21:10.623743Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-10T15:06:38.513857Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to send response: channel closed
+[2m2025-07-10T15:06:38.516626Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to send response: channel closed
+[2m2025-07-10T15:06:38.519414Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to send response: channel closed
+[2m2025-07-10T15:06:38.521144Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to send response: channel closed
+[2m2025-07-10T15:06:38.522272Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to send response: channel closed
+[2m2025-07-10T15:06:38.523247Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to send response: channel closed
+[2m2025-07-10T15:06:38.524768Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m Failed to send response: channel closed
+[2m2025-07-11T05:18:53.303986Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No workspace config available to activate workspace.
+[2m2025-07-15T05:19:51.869646Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No workspace config available to activate workspace.
+[2m2025-07-15T05:21:07.886487Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-07-16T05:18:25.334059Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No workspace config available to activate workspace.
+[2m2025-07-16T05:19:49.766330Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-07-16T05:19:51.512358Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-07-16T05:19:55.260186Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-07-16T05:19:59.112172Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-07-16T05:20:07.531904Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-07-16T05:20:46.637601Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No Workspace
+[2m2025-07-16T05:21:17.309310Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-04T06:53:18.600737Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No workspace config available to activate workspace.
+[2m2025-08-04T09:19:23.752475Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No workspace config available to activate workspace.
+[2m2025-08-04T09:19:50.250358Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-04T09:19:55.318293Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-04T09:19:59.004432Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-04T09:20:05.908410Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T05:19:30.698418Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No workspace config available to activate workspace.
+[2m2025-08-06T05:19:49.906215Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T05:19:57.736404Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T05:19:59.235038Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T05:20:11.990231Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T05:20:13.725179Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T05:20:14.753950Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T05:20:17.148376Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
+[2m2025-08-06T05:20:18.208365Z[0m [31mERROR[0m [2mglazewm[0m[2m:[0m No displayed workspace.
