@@ -100,6 +100,7 @@ $scoop_packages = @(
     "JetBrainsMono-NF-Mono",
     "glazewm",
     "zebar",
+    "wezterm",
 
     # utils
     "cowsay",
