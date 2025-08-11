@@ -44,8 +44,8 @@ function Start-SubScript
 }
 
 $procs = @()
-# $procs += Start-SubScript "$PSScriptRoot\install_scripts\install_symlinks.ps1" -Admin $true -UseProfile $false
-# $procs += Start-SubScript "$PSScriptRoot\install_scripts\install_scoop.ps1"  -Admin $false -UseProfile $true
+$procs += Start-SubScript "$PSScriptRoot\install_scripts\install_symlinks.ps1" -Admin $true -UseProfile $false
+$procs += Start-SubScript "$PSScriptRoot\install_scripts\install_scoop.ps1"  -Admin $false -UseProfile $true
 $procs += Start-SubScript "$PSScriptRoot\install_scripts\install_winget_and_msys2.ps1" -Admin $true -UseProfile $false
 
 Write-Host "Started install tasks in parallel. Waiting for them to finish..."
