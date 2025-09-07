@@ -52,6 +52,9 @@ Unlock-File .\install.ps1
 
 ### Neovim as Editor
 
+> [!WARNING]
+> This config uses Neovim 0.12 ngihtly for native packet manager. It will not work in older versions
+
 > [!NOTE] 
 > currently not possible to install roslyn automatically with Mason so Run manually inside neovim
 
