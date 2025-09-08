@@ -19,12 +19,14 @@ vim.opt.smartcase = true
 vim.opt.breakindent = true
 vim.opt.undofile = true
 vim.opt.winborder = 'rounded'
+vim.opt.swapfile = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 vim.opt.list = true
 vim.opt.listchars = { tab = '→ ', trail = '·' }
 vim.opt.title = true
 vim.opt.foldmethod = 'indent'
+vim.opt.foldenable = false
 
 vim.opt.completeopt = 'menuone,noinsert'
 vim.opt.pumheight = 15
@@ -35,6 +37,7 @@ vim.cmd('syntax on')
 vim.cmd('colorscheme habamax')
 vim.cmd('filetype plugin indent on')
 
+
 -- plugins
 vim.pack.add({
     { src = 'https://github.com/stevearc/oil.nvim' },
@@ -44,6 +47,7 @@ vim.pack.add({
     { src = 'https://github.com/seblyng/roslyn.nvim' },
     { src = 'https://github.com/nvim-mini/mini.tabline' },
     { src = 'https://github.com/lewis6991/gitsigns.nvim' },
+    { src = "https://github.com/L3MON4D3/LuaSnip" },
 })
 
 require 'mini.tabline'.setup()
@@ -62,6 +66,18 @@ require('mason-lspconfig').setup({
     },
     automatic_enable = {}
 })
+
+require("luasnip").setup({ enable_autosnippets = true })
+
+local nvim_dir = vim.fn.stdpath('config')
+local snippets_dir = nvim_dir .. '/snippets/'
+require("luasnip.loaders.from_lua").load({
+    paths = { snippets_dir },
+})
+local ls = require("luasnip")
+vim.keymap.set("i", "<C-e>", function() ls.expand_or_jump(1) end, { silent = true })
+vim.keymap.set({ "i", "s" }, "<C-J>", function() ls.jump(1) end, { silent = true })
+vim.keymap.set({ "i", "s" }, "<C-K>", function() ls.jump(-1) end, { silent = true })
 
 vim.lsp.enable({
     'lua_ls',
