@@ -5,6 +5,9 @@
 
 [core]
     editor = nvim
+    whitespace = error
+    compression = 9
+    preloadindex = true
 
 [commit]
     gpgSign = true

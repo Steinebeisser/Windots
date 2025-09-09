@@ -27,6 +27,7 @@ vim.opt.listchars = { tab = '→ ', trail = '·' }
 vim.opt.title = true
 vim.opt.foldmethod = 'indent'
 vim.opt.foldenable = false
+vim.opt.confirm = true
 
 vim.opt.completeopt = 'menuone,noinsert'
 vim.opt.pumheight = 15
@@ -101,13 +102,25 @@ function _G.statusline()
         branch = '  ' .. branch .. ' '
     end
 
+    local function cwd_context()
+        local full = vim.fn.fnamemodify(vim.fn.getcwd(), ':~')
+        local project = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
+        return string.format('[%s: %s]', project, full)
+    end
+
+    local cwd = cwd_context()
+    local time = os.date('%H:%M')
+
     return table.concat({
         '%f',
         branch,
+        cwd,
         '%m%r',
         '%=',
         '%l:%c',
         ' (%p%%, %Ll)',
+        time,
+        '  '
     }, ' ')
 end
 
@@ -130,7 +143,17 @@ vim.keymap.set('n', '<leader>=', '<C-w>=')
 vim.keymap.set('n', '<leader>c', ':close<CR>')
 vim.keymap.set('n', '<leader>v', ':vsplit<CR>')
 vim.keymap.set('n', '<leader>h', ':split<CR>')
-vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]])
+vim.keymap.set('t', '<C-q>', [[<C-\><C-n>]])
+vim.keymap.set('n', '<leader>tn', ':tabnew<CR>')
+vim.keymap.set('n', '<leader>to', ':tabonly<CR>')
+vim.keymap.set('n', '<leader>tc', ':tabclose<CR>')
+
+vim.keymap.set('n', '<leader>q', function()
+    local choice = vim.fn.confirm("?Wad?? u wanna Quit?", "&Yes\n&No", 2)
+    if choice == 1 then
+        vim.cmd('qa')
+    end
+end)
 
 -- auto cmds
 vim.api.nvim_create_autocmd('TextYankPost', {
@@ -164,7 +187,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
         vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
         vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-        vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, opts)
+        vim.keymap.set('i', '<C-S>', vim.lsp.buf.signature_help, opts)
 
         vim.keymap.set('n', '<leader>th', function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = args.buf }))
@@ -174,20 +197,21 @@ vim.api.nvim_create_autocmd('LspAttach', {
             vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
         end
 
-        -- if client and client.name == 'roslyn' then
-        -- vim.lsp.completion.enable(true, args.data.client_id, args.buf, { autotrigger = true })
+        if client and client.name == 'roslyn' then
+            -- vim.lsp.completion.enable(true, args.data.client_id, args.buf, { autotrigger = true })
 
-        vim.api.nvim_create_autocmd('TextChangedI', {
-            buffer = args.buf,
-            callback = function()
-                local line = vim.api.nvim_get_current_line()
-                local col = vim.api.nvim_win_get_cursor(0)[2]
-                local last_char = line:sub(col, col)
-                if last_char:match('[%w_]') and vim.fn.pumvisible() == 0 then
-                    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-X><C-O>', true, false, true), 'n', true)
-                end
-            end,
-        }) -- end
+            vim.api.nvim_create_autocmd('TextChangedI', {
+                buffer = args.buf,
+                callback = function()
+                    local line = vim.api.nvim_get_current_line()
+                    local col = vim.api.nvim_win_get_cursor(0)[2]
+                    local last_char = line:sub(col, col)
+                    if last_char:match('[%w_]') and vim.fn.pumvisible() == 0 then
+                        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-X><C-O>', true, false, true), 'n', true)
+                    end
+                end,
+            })
+        end
 
 
         if client and client:supports_method('textDocument/formatting') then
@@ -230,7 +254,6 @@ vim.api.nvim_create_autocmd('CursorHold', {
 
 vim.api.nvim_create_autocmd('FileType', {
     callback = function(event)
-        local nvim_dir = vim.fn.stdpath('config')
         local ft = vim.bo[event.buf].filetype
         local make_file = nvim_dir .. '/make/' .. ft .. '.lua'
         if vim.fn.filereadable(make_file) == 1 then
@@ -246,8 +269,6 @@ if vim.loop.os_uname().sysname == 'Windows_NT' then
         vim.opt.shell = 'powershell'
     end
     vim.opt.shellcmdflag = '-NoLogo -ExecutionPolicy RemoteSigned -Command'
-    vim.opt.shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
-    vim.opt.shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
     vim.opt.shellquote = ''
     vim.opt.shellxquote = ''
 else
