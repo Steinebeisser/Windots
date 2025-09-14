@@ -49,6 +49,8 @@ vim.pack.add({
     { src = 'https://github.com/nvim-mini/mini.tabline' },
     { src = 'https://github.com/lewis6991/gitsigns.nvim' },
     { src = "https://github.com/L3MON4D3/LuaSnip" },
+    { src = 'https://github.com/hrsh7th/nvim-cmp' },
+    { src = 'https://github.com/hrsh7th/cmp-nvim-lsp' },
 })
 
 require 'mini.tabline'.setup()
@@ -70,6 +72,238 @@ require('mason-lspconfig').setup({
 
 require("luasnip").setup({ enable_autosnippets = true })
 
+local cmp_ok, cmp = pcall(require, 'cmp')
+if cmp_ok then
+    cmp.setup({
+        enabled = function()
+            return vim.b.cmp_enabled ~= false
+        end,
+        snippet = {
+            expand = function(args) require('luasnip').lsp_expand(args.body) end,
+        },
+        mapping = cmp.mapping.preset.insert({
+            ['<CR>'] = cmp.mapping.confirm({ select = true }),
+            ['<Tab>'] = cmp.mapping(function(fallback)
+                local ls = require('luasnip')
+                if cmp.visible() then
+                    cmp.select_next_item()
+                elseif ls.expand_or_jumpable() then
+                    ls.expand_or_jump()
+                else
+                    fallback()
+                end
+            end, { 'i', 's' }),
+            ['<S-Tab>'] = cmp.mapping(function(fallback)
+                local ls = require('luasnip')
+                if cmp.visible() then
+                    cmp.select_prev_item()
+                elseif ls.jumpable(-1) then
+                    ls.jump(-1)
+                else
+                    fallback()
+                end
+            end, { 'i', 's' }),
+        }),
+        sources = { { name = 'nvim_lsp' } },
+        completion = { completeopt = 'menu,menuone,noinsert', autocomplete = false },
+        experimental = { ghost_text = true },
+        window = {
+            completion = cmp.config.window.bordered(),
+            documentation = cmp.config.window.bordered(),
+        },
+    })
+
+    cmp.setup.filetype({ 'cs', 'csharp' }, {
+        completion = { autocomplete = { cmp.TriggerEvent.TextChanged } },
+    })
+end
+
+-- TODO: autocommands to enable/disable cmp for current buffer
+
+
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+pcall(function()
+    capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+end)
+
+if vim.fn.executable('dotnet') == 1 then
+    require("roslyn").setup({})
+
+    local roslyn_handlers = require("roslyn.lsp.handlers")
+    local orig_needs_restore = roslyn_handlers["workspace/_roslyn_projectNeedsRestore"]
+    local function run_restore(root)
+        if vim.fn.executable('dotnet') ~= 1 then return end
+        vim.notify("Running: dotnet restore", vim.log.levels.INFO, { title = "roslyn.nvim" })
+        vim.system({ 'dotnet', 'restore' }, { cwd = root }, function(res)
+            if res.code == 0 then
+                vim.schedule(function()
+                    vim.notify("dotnet restore completed", vim.log.levels.INFO, { title = "roslyn.nvim" })
+                end)
+            else
+                vim.schedule(function()
+                    vim.notify("dotnet restore failed (code " .. tostring(res.code) .. ")", vim.log.levels.ERROR,
+                        { title = "roslyn.nvim" })
+                end)
+            end
+        end)
+    end
+
+    local handlers = vim.tbl_extend('force', roslyn_handlers, {
+        ["workspace/_roslyn_projectNeedsRestore"] = function(err, params, ctx, config)
+            local orig_result
+            if type(orig_needs_restore) == 'function' then
+                local ok, r = pcall(orig_needs_restore, err, params, ctx, config)
+                if ok and r ~= nil then orig_result = r end
+            end
+            local client = ctx and ctx.client_id and vim.lsp.get_client_by_id(ctx.client_id)
+            local root = client and client.config and client.config.root_dir or vim.fn.getcwd()
+            run_restore(root)
+            return orig_result ~= nil and orig_result or vim.NIL
+        end,
+    })
+
+    vim.lsp.config("roslyn", {
+        filetypes = { "cs", "csharp" },
+        workspace_required = false,
+        handlers = handlers,
+        capabilities = capabilities,
+        opts = {
+            filewatching = "nvim",
+        }
+    })
+
+    local function roslyn_notify_file(uri, change_type)
+        for _, client in ipairs(vim.lsp.get_clients({ name = 'roslyn' })) do
+            client:notify('workspace/didChangeWatchedFiles', {
+                changes = { { uri = uri, type = change_type } },
+            })
+        end
+    end
+
+    vim.api.nvim_create_autocmd('BufWritePre', {
+        pattern = '*.cs',
+        callback = function(args)
+            local fname = vim.api.nvim_buf_get_name(args.buf)
+            local exists = vim.fn.filereadable(fname) == 1
+            vim.b[args.buf].roslyn_was_new_cs = not exists
+        end,
+    })
+
+    vim.api.nvim_create_autocmd('BufWritePost', {
+        pattern = '*.cs',
+        callback = function(args)
+            local fname = vim.api.nvim_buf_get_name(args.buf)
+            if fname == '' then return end
+            local uri = vim.uri_from_fname(fname)
+            local was_new = vim.b[args.buf].roslyn_was_new_cs
+            if was_new then
+                roslyn_notify_file(uri, 1) -- Created
+            else
+                roslyn_notify_file(uri, 2) -- Changed
+            end
+            vim.b[args.buf].roslyn_was_new_cs = nil
+        end,
+    })
+
+    vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+            local client = vim.lsp.get_client_by_id(args.data.client_id)
+            if client and client.name == "roslyn"
+                and client.server_capabilities.inlayHintProvider then
+                vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+            end
+        end,
+    })
+else
+    vim.notify('Roslyn LSP unavailable (install .NET SDK)', vim.log.levels.WARN)
+end
+
+vim.lsp.config('lua_ls', {
+    capabilities = capabilities,
+    settings = {
+        Lua = {
+            workspace = { library = vim.api.nvim_get_runtime_file('', true), checkThirdParty = false },
+            telemetry = { enable = false },
+        }
+    }
+})
+
+
+vim.lsp.enable({ 'roslyn' })
+
+vim.api.nvim_create_user_command('StartLsp', function(opts)
+    local server = opts.args ~= '' and opts.args or nil
+    if not server then
+        local ft = vim.bo.filetype
+        local map = {
+            c = 'clangd',
+            cpp = 'clangd',
+            cuda = 'clangd',
+            lua = 'lua_ls',
+            cs = 'roslyn',
+            csharp = 'roslyn',
+        }
+        server = map[ft]
+    end
+    if not server then
+        vim.notify('No LSP mapped for this filetype. Pass a server: :StartLsp <server>', vim.log.levels.WARN)
+        return
+    end
+
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+        client:stop()
+    end
+
+    local configs = {
+        clangd = {
+            name = 'clangd',
+            cmd = { 'clangd' },
+            root_dir = vim.fs.root(bufnr, { '.clangd', '.clang-tidy', '.clang-format', 'compile_commands.json', 'compile_flags.txt', 'configure.ac', '.git' }) or vim.fn.getcwd(),
+        },
+    }
+
+    local config = configs[server]
+    if not config then
+        vim.notify('No config defined for server: ' .. server, vim.log.levels.ERROR)
+        return
+    end
+
+    if server == 'clangd' then
+        config = vim.tbl_deep_extend('force', config, { capabilities = capabilities })
+    end
+
+    local client_id = vim.lsp.start(config, { bufnr = bufnr })
+    if not client_id then
+        vim.notify('Failed to start LSP server: ' .. server, vim.log.levels.ERROR)
+    end
+end, { nargs = '?' })
+
+vim.api.nvim_create_user_command('StopLsp', function(opts)
+    local bufnr = vim.api.nvim_get_current_buf()
+    local server_name = opts.args ~= '' and opts.args or nil
+
+    local clients = vim.lsp.get_clients({ bufnr = bufnr })
+
+    if server_name then
+        local stopped = false
+        for _, client in ipairs(clients) do
+            if client.name == server_name then
+                client.stop()
+                stopped = true
+            end
+        end
+        if not stopped then
+            vim.notify('No active LSP found with name: ' .. server_name, vim.log.levels.WARN)
+        end
+    else
+        for _, client in ipairs(clients) do
+            client.stop()
+        end
+    end
+end, { nargs = '?' })
+
 local nvim_dir = vim.fn.stdpath('config')
 local snippets_dir = nvim_dir .. '/snippets/'
 require("luasnip.loaders.from_lua").load({
@@ -79,22 +313,6 @@ local ls = require("luasnip")
 vim.keymap.set("i", "<C-e>", function() ls.expand_or_jump(1) end, { silent = true })
 vim.keymap.set({ "i", "s" }, "<C-J>", function() ls.jump(1) end, { silent = true })
 vim.keymap.set({ "i", "s" }, "<C-K>", function() ls.jump(-1) end, { silent = true })
-
-vim.lsp.enable({
-    'lua_ls',
-    'clangd',
-})
-
-
-vim.lsp.config('lua_ls', {
-    settings = {
-        Lua = {
-            workspace = { library = vim.api.nvim_get_runtime_file('', true), checkThirdParty = false },
-            telemetry = { enable = false },
-        }
-    }
-})
-
 
 function _G.statusline()
     local branch = vim.b.gitsigns_head or ''
@@ -193,27 +411,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = args.buf }))
         end, opts)
 
-        if client and client.name == 'roslyn' and client.server_capabilities.inlayHintProvider then
-            vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
-        end
-
-        if client and client.name == 'roslyn' then
-            -- vim.lsp.completion.enable(true, args.data.client_id, args.buf, { autotrigger = true })
-
-            vim.api.nvim_create_autocmd('TextChangedI', {
-                buffer = args.buf,
-                callback = function()
-                    local line = vim.api.nvim_get_current_line()
-                    local col = vim.api.nvim_win_get_cursor(0)[2]
-                    local last_char = line:sub(col, col)
-                    if last_char:match('[%w_]') and vim.fn.pumvisible() == 0 then
-                        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-X><C-O>', true, false, true), 'n', true)
-                    end
-                end,
-            })
-        end
-
-
         if client and client:supports_method('textDocument/formatting') then
             local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
             vim.api.nvim_create_autocmd('BufWritePre', {
@@ -225,25 +422,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
             })
         end
     end,
-})
-
-vim.api.nvim_create_autocmd('FileType', {
-    pattern = 'cs',
-    callback = function()
-        if vim.fn.executable('dotnet') == 0 then
-            vim.notify('Roslyn LSP unavailable (install .NET SDK)', vim.log.levels.WARN)
-            return
-        end
-
-        -- require('roslyn').setup()
-
-
-        vim.lsp.config('roslyn', {
-            root_dir = function()
-                return vim.fs.dirname(vim.fs.find({ '.csproj', 'Directory.Build.props', '.sln' }, { upward = true })[1])
-            end,
-        })
-    end
 })
 
 vim.api.nvim_create_autocmd('CursorHold', {
@@ -263,14 +441,22 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 
 if vim.loop.os_uname().sysname == 'Windows_NT' then
-    if vim.fn.executable('pwsh') == 1 then
-        vim.opt.shell = 'pwsh'
-    elseif vim.fn.executable('powershell') == 1 then
-        vim.opt.shell = 'powershell'
-    end
-    vim.opt.shellcmdflag = '-NoLogo -ExecutionPolicy RemoteSigned -Command'
-    vim.opt.shellquote = ''
-    vim.opt.shellxquote = ''
+    -- vim.opt.shell = 'pwsh'
+    -- vim.opt.shellcmdflag = '-nologo -noprofile -ExecutionPolicy RemoteSigned -command'
+    -- vim.opt.shellxquote = ''
+    vim.o.shell = vim.fn.executable('pwsh') == 1 and 'pwsh' or 'powershell'
+
+    vim.o.shellcmdflag = '-NoLogo -NonInteractive -ExecutionPolicy RemoteSigned -Command'
+
+    vim.cmd([[
+      let &shellcmdflag .= " [Console]::OutputEncoding=[System.Text.UTF8Encoding]::new();$PSStyle.OutputRendering='PlainText';"
+    ]])
+
+    vim.o.shellredir = '2>&1 | Out-File %s; exit $LastExitCode'
+    vim.o.shellpipe  = '2>&1 | Tee-Object %s; exit $LastExitCode'
+
+    vim.o.shellquote = ''
+    vim.o.shellxquote = ''
 else
     vim.opt.shell = '/bin/zsh'
 end

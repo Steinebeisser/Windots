@@ -3,6 +3,7 @@
 return {
     s("mail", t("paul.geisthardt@gmx.de")),
     s("email", t("paul.geisthardt@gmx.de")),
+    s("pg", t("Paul Geisthardt")),
     s("sinc", t("paul.geisthardt@sinc.de")),
     s("gh", t("github.com/Steinebeisser")),
     s("now", f(function() return os.date("%d-%m-%Y %H:%M:%S") end)),
