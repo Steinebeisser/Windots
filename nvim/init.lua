@@ -105,7 +105,7 @@ if cmp_ok then
             end, { 'i', 's' }),
         }),
         sources = { { name = 'nvim_lsp' } },
-        completion = { completeopt = 'menu,menuone,noinsert', autocomplete = false },
+        completion = { completeopt = 'menuone,noinsert' },
         experimental = { ghost_text = true },
         window = {
             completion = cmp.config.window.bordered(),
@@ -345,14 +345,30 @@ end
 vim.opt.statusline = '%!v:lua.statusline()'
 
 vim.keymap.set('n', '<leader>gf', vim.lsp.buf.format)
+
 vim.keymap.set('n', '<leader>f', ':Pick files<CR>')
 vim.keymap.set('n', '<leader>fh', ':Pick help<CR>')
+vim.keymap.set('n', '<leader>fg', ':Pick grep_live<CR>')
+vim.keymap.set('n', '<leader>fg', ':Pick grep_live<CR>')
+
 vim.keymap.set('n', '<leader>bb', ':Pick buffers<CR>')
-vim.keymap.set('n', '<leader>e', ':Oil<CR>')
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
-vim.keymap.set('n', '<leader>bn', ':bnext<CR>')
-vim.keymap.set('n', '<leader>bp', ':bprev<CR>')
+vim.keymap.set('n', '<Tab>', ':bnext<CR>')
+vim.keymap.set('n', '<S-Tab>', ':bprev<CR>')
 vim.keymap.set('n', '<leader>bd', ':bdelete<CR>')
+
+vim.keymap.set('n', '<leader>e', ':Oil<CR>')
+
+vim.keymap.set('n', '<leader>qo', ':copen<CR>')
+vim.keymap.set('n', '<leader>qc', ':cclose<CR>')
+vim.keymap.set('n', '<leader>qn', ':cnext<CR>')
+vim.keymap.set('n', '<leader>qp', ':cprev<CR>')
+
+vim.keymap.set('n', '<leader>lo', ':lopen<CR>')
+vim.keymap.set('n', '<leader>lc', ':lclose<CR>')
+vim.keymap.set('n', '<leader>ln', ':lnext<CR>')
+vim.keymap.set('n', '<leader>lp', ':lprev<CR>')
+
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<C-Up>', ':resize +2<CR>')
 vim.keymap.set('n', '<C-Down>', ':resize -2<CR>')
 vim.keymap.set('n', '<C-Left>', ':vertical resize -2<CR>')
@@ -441,22 +457,35 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 
 if vim.loop.os_uname().sysname == 'Windows_NT' then
-    -- vim.opt.shell = 'pwsh'
-    -- vim.opt.shellcmdflag = '-nologo -noprofile -ExecutionPolicy RemoteSigned -command'
-    -- vim.opt.shellxquote = ''
+--     vim.opt.shell = 'pwsh'
+--     vim.opt.shellcmdflag = '-nologo -noprofile -ExecutionPolicy RemoteSigned -command'
+--     vim.opt.shellxquote = ''
+-- vim.o.shellredir = ''
+-- vim.o.shellpipe  = ''
+
+-- vim.o.shell = 'cmd.exe'
+--   vim.o.shellcmdflag = '/s /c'
+--   vim.o.shellredir = ' > %s 2>&1'
+--   vim.o.shellpipe = ' > %s 2>&1'
+--   vim.o.shellquote = '"'
+--   vim.o.shellxquote = '"'
+--   vim.o.shellslash = false  -- Use backslashes in paths for cmd compatibility
+
     vim.o.shell = vim.fn.executable('pwsh') == 1 and 'pwsh' or 'powershell'
+vim.o.shellslash = true
+vim.o.shellcmdflag =
+  '-NoLogo -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -Command ' ..
+  '[Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new();' ..
+  "$PSDefaultParameterValues['Out-File:Encoding']='utf8';" ..
+  "$PSStyle.OutputRendering = 'PlainText';" ..
+  'Remove-Alias -Force -ErrorAction SilentlyContinue tee;'
 
-    vim.o.shellcmdflag = '-NoLogo -NonInteractive -ExecutionPolicy RemoteSigned -Command'
+vim.o.shellredir = '2>&1 | Out-File -Encoding UTF8 "%s"; exit $LastExitCode'
+vim.o.shellpipe  = '2>&1 | Tee-Object -Encoding UTF8 "%s"; exit $LastExitCode'
 
-    vim.cmd([[
-      let &shellcmdflag .= " [Console]::OutputEncoding=[System.Text.UTF8Encoding]::new();$PSStyle.OutputRendering='PlainText';"
-    ]])
-
-    vim.o.shellredir = '2>&1 | Out-File %s; exit $LastExitCode'
-    vim.o.shellpipe  = '2>&1 | Tee-Object %s; exit $LastExitCode'
-
-    vim.o.shellquote = ''
-    vim.o.shellxquote = ''
+vim.o.shellquote  = ''
+vim.o.shellxquote = ''
 else
     vim.opt.shell = '/bin/zsh'
 end
+
