@@ -1,0 +1,194 @@
+" .ideavimrc is a configuration file for IdeaVim plugin. It uses
+"   the same commands as the original .vimrc configuration.
+" You can find a list of commands here: https://jb.gg/h38q75
+" Find more examples here: https://jb.gg/share-ideavimrc
+
+
+" Source your .vimrc
+source ~/.vimrc
+
+let mapleader = ' '
+
+Plug 'machakann/vim-highlightedyank'
+Plug 'tpope/vim-commentary'
+Plug 'preservim/nerdtree'
+Plug 'tpope/vim-surround'
+Plug 'justinmk/vim-sneak'
+set quickscope
+let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
+set which-key
+
+" basic config
+set number
+set relativenumber
+set colorcolumn=80
+set scrolloff=8
+set wrap
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+set smartindent
+set breakindent
+set list
+set splitbelow
+set splitright
+set undofile
+" Enable 24-bit color
+set termguicolors
+
+" Enable the sign column to prevent the screen from jumping
+set signcolumn=yes
+set cursorline
+set foldlevel=99
+set foldlevelstart=99
+set foldenable
+set foldcolumn=0
+set foldnestmax=5
+
+set clipboard+=unnamed,unnamedplus,ideaput
+set ideajoin
+set idearefactormode=keep
+set showmode
+set showcmd
+set incsearch
+
+
+" Visual mode mappings
+vmap <leader>y "*y
+vmap <leader>p "*p
+
+" Paste without losing the contents of the register
+vmap <Leader>p "_dP
+
+" Normal mode mappings
+
+" misc
+nmap <Esc> :nohlsearch<CR>
+nmap <leader>rs <Action>(RestartIde)
+nmap <leader>iv <Action>(InvalidateCaches)
+
+" formatting
+nmap <leader>gf <Action>(ReformatCode)
+nmap <leader>rf <Action>(ReformatCode)
+nmap <leader>ro <Action>(OptimizeImports)
+nmap <leader>cc <Action>(CodeCleanup)
+
+" navigation/search
+nmap <leader>f <Action>(GotoFile)
+nmap <leader>ff <Action>(GotoFile)
+nmap <leader>fg <Action>(FindInPath)
+nmap <leader>sm <Action>(GotoSuperMethod)
+nmap <leader>gi <Action>(GotoImplementation)
+nmap gd <Action>(GotoDeclaration)
+nmap gh <Action>(QuickImplementations)
+nmap gr <Action>(FindUsages)
+
+" Center buffer while navigating
+nnoremap <C-u> <C-u>zz
+nnoremap <C-d> <C-d>zz
+nnoremap { {zz
+nnoremap } }zz
+nnoremap N Nzz
+nnoremap n nzz
+nnoremap G Gzz
+nnoremap gg ggzz
+nnoremap gd gdzz
+nnoremap <C-i> <C-i>zz
+nnoremap <C-o> <C-o>zz
+nnoremap % %zz
+nnoremap * *zz
+nnoremap # #zz
+
+" Buffer navigation
+nmap <leader>bb <Action>(Switcher)
+nmap <Tab> <Action>(NextTab)
+nmap <S-Tab> <Action>(PreviousTab)
+nmap <leader>bd <Action>(CloseContent)
+nmap <leader>br <Action>(RecentFiles)
+
+" Nerdtree
+nmap <leader>e :NERDTreeToggle<CR>
+nmap <leader>E :NERDTreeFocus<CR>
+nmap <leader>ef :NERDTreeFind<CR>
+
+" quickfix/location list
+nmap <leader>qo <Action>(ActivateProblemsViewToolWindow)
+nmap <leader>qc <Action>(HideActiveWindow)
+nmap <leader>qa <Action>(HideAllWindows)
+nmap <leader>qn <Action>(GotoNextError)
+nmap <leader>qp <Action>(GotoPreviousError)
+
+" Window settings
+nmap <C-Up> <Action>(StretchSplitToTop)
+nmap <C-Down> <Action>(StretchSplitToBottom)
+nmap <C-Left> <Action>(StretchSplitToLeft)
+nmap <C-Right> <Action>(StretchSplitToRight)
+nmap <leader>c :close<CR>
+nmap <leader>v <Action>(SplitVertically)
+nmap <leader>h <Action>(SplitHorizontally)
+nmap <leader>u <Action>(Unsplit)
+nmap <leader>tc <Action>(Unsplit)
+
+" Editing
+nmap <leader>ca <Action>(ShowIntentionActions)
+nmap <leader>rn <Action>(RenameElement)
+nmap <leader>ri <Action>(ImplementMethods)
+nmap <leader>rm <Action>(ExtractMethod)
+nmap <leader>qf <Action>(QuickFix)
+nmap <C-w>d <Action>(ShowErrorDescription)
+
+" terminal
+nmap <leader>t <Action>(ActivateTerminalToolWindow)
+
+
+"run debug build
+nmap <leader>ru <Action>(Run)
+nmap <leader>d <Action>(Debug)
+nmap <leader>b <Action>(BuildSolutionAction)
+nmap <leader>cl <Action>(CleanSolutionAction)
+nmap <leader>st <Action>(Stop)
+nmap <leader>db <Action>(ToggleLineBreakpoint)
+nmap <leader>si <Action>(StepInto)
+nmap <leader>so <Action>(StepOut)
+nmap <leader>sr <Action>(Resume)
+nmap <leader>dg <Action>(ShowArchitectureDiagramAction)
+nmap <leader>vt <Action>(ValueTracking)
+nmap <leader>hi <Action>(Hierarchy.InspectType)
+
+" run config
+nmap <leader>er <Action>(ChooseRunConfiguration)
+nmap <leader>ed <Action>(ChooseDebugConfiguration)
+nmap <leader>ee <Action>(editRunConfigurations)
+
+" testing
+nmap <leader>ut <Action>(Rider.UnitTesting.ExplorerPopup)
+nmap <leader>uw <Action>(ActivateUnitTestsToolWindow)
+
+" resharper
+nmap <leader>rr <Action>(ProblemsViewReSharperReanalyzeAllFiles)
+
+
+" insert mode
+imap <C-S> <Action>(ParameterInfo)
+
+
+" modes
+nmap <leader>th <Action>(ToggleInlayHintsGloballyAction)
+nmap <leader>md <Action>(ToggleDistractionFreeMode)
+nmap <leader>mp <Action>(TogglePresentationMode)
+nmap <leader>mz <Action>(ToggleZenMode)
+
+" Don't use Ex mode, use Q for formatting.
+map Q gq
+
+
+" --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
+"" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
+
+
+
+" todo
+" Git blame: Annotate
+" git diff: Compare.SameVersion
+" file history: Vcs.ShowTabbedFileHistory

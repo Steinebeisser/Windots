@@ -23,14 +23,21 @@ function gcl  { git clone --recursive @args }
 function gd   { git diff --output-indicator-new=" " --output-indicator-old=" " @args }
 function gds  { git diff --staged --output-indicator-new=" " --output-indicator-old=" " @args }
 function gi   { git init @args }
-function gl   { git log --graph --pretty=format:"%C(magenta)%h %C(white) %an  %ar%C(auto)  %D%n%s%n" @args }
-function gla   { gl --all }
+function gl   { git log --graph --pretty=format:"%C(magenta)%h %C(white) %an %G? %ar%C(auto)  %D%n%s%n" @args }
+function gls  { git log --graph --pretty=format:'%C(auto)%h%Creset -%C(yellow)%d%Creset %s %C(blue)(%cr) %C(green)<%an>%Creset' --abbrev-commit }
+function gla  { gl --all }
 function gm   { git merge @args }
 function gn   { git checkout -b @args }
 function gp   { git push @args }
 function gr   { git reset @args }
 function gs   { git status --short @args }
 function gu   { git pull @args }
+function gf   { git fetch @args }
+function gst   { git stash @args }
+function gsa  { git stash apply @args }
+function gsp  { git stash pop @args }
+function gsd  { git stash drop @args }
+function gsl  { git stash list @args }
 function ..   { cd .. }
 function ...  { cd ..\.. }
 

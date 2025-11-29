@@ -1,11 +1,30 @@
 vim.g.mapleader = ' '
 
+vim.g.loaded_gzip = 1
+vim.g.loaded_tar = 1
+vim.g.loaded_tarPlugin = 1
+vim.g.loaded_zip = 1
+vim.g.loaded_zipPlugin = 1
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.g.loaded_netrwSettings = 1
+vim.g.loaded_netrwFileHandlers = 1
+vim.g.loaded_matchit = 1
+vim.g.loaded_matchparen = 1
+vim.g.loaded_2html_plugin = 1
+vim.g.loaded_tutor_mode_plugin = 1
+vim.g.loaded_spellfile_plugin = 1
+vim.g.loaded_man = 1
+vim.g.loaded_osc52 = 1
+vim.g.loaded_editorconfig = 1
+
+
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
-vim.opt.clipboard = 'unnamedplus'
+-- vim.opt.clipboard = 'unnamedplus'
 vim.opt.colorcolumn = '80'
 vim.opt.signcolumn = 'yes'
 vim.opt.cursorline = false
@@ -23,7 +42,11 @@ vim.opt.swapfile = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 vim.opt.list = true
-vim.opt.listchars = { tab = '→ ', trail = '·' }
+vim.opt.listchars = {
+    tab = '→ ',
+    -- space = '·',
+    nbsp = '⍽'
+}
 vim.opt.title = true
 vim.opt.foldmethod = 'indent'
 vim.opt.foldenable = false
@@ -37,7 +60,46 @@ vim.opt.laststatus = 3
 vim.cmd('syntax on')
 vim.cmd('colorscheme habamax')
 vim.cmd('filetype plugin indent on')
+vim.cmd('set tags=./tags;,tags;')
 
+-- local whitespace_group = vim.api.nvim_create_augroup("SmartWhitespace", { clear = true })
+
+-- local function define_whitespace_highlight()
+--     vim.cmd("highlight EOLWS ctermbg=red guibg=red")
+-- end
+--
+-- define_whitespace_highlight()
+--
+-- vim.api.nvim_create_autocmd("ColorScheme", {
+--     group = whitespace_group,
+--     callback = define_whitespace_highlight,
+-- })
+--
+-- local function set_whitespace_match(group, pattern)
+--     vim.fn.clearmatches()
+--     if pattern ~= "" then
+--         vim.fn.matchadd(group, pattern)
+--     end
+-- end
+--
+-- vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "InsertEnter", "InsertLeave" }, {
+--     group = whitespace_group,
+--     pattern = "*",
+--     callback = function()
+--         set_whitespace_match("EOLWS", [[\s\+$\| \+\ze\t]])
+--     end,
+-- })
+
+vim.cmd('highlight NbspWhitespace ctermbg=red guibg=red')
+vim.cmd('2match NbspWhitespace /\\%u00a0/')
+
+vim.api.nvim_create_user_command(
+    'FixNbsp',
+    ':%s/\\%u00a0/ /g',
+    {}
+)
+
+pcall(vim.loader.enable)
 
 -- plugins
 vim.pack.add({
@@ -46,16 +108,19 @@ vim.pack.add({
     { src = 'https://github.com/mason-org/mason.nvim' },
     { src = 'https://github.com/mason-org/mason-lspconfig.nvim' },
     { src = 'https://github.com/seblyng/roslyn.nvim' },
-    { src = 'https://github.com/nvim-mini/mini.tabline' },
+    -- { src = 'https://github.com/nvim-mini/mini.tabline' },
     { src = 'https://github.com/lewis6991/gitsigns.nvim' },
     { src = "https://github.com/L3MON4D3/LuaSnip" },
     { src = 'https://github.com/hrsh7th/nvim-cmp' },
     { src = 'https://github.com/hrsh7th/cmp-nvim-lsp' },
+    { src = 'https://github.com/MeanderingProgrammer/render-markdown.nvim' },
+    { src = 'https://github.com/Eandrju/cellular-automaton.nvim' },
+    { src = 'https://github.com/alec-gibson/nvim-tetris' },
+
 })
 
-require 'mini.tabline'.setup()
 require 'oil'.setup()
-require 'mini.pick'.setup()
+
 require('mason').setup({
     registries = {
         'github:mason-org/mason-registry',
@@ -65,10 +130,15 @@ require('mason').setup({
 require('mason-lspconfig').setup({
     ensure_installed = {
         'lua_ls',
-        'clangd',
+        'clangd'
     },
-    automatic_enable = {}
+    automatic_enable = {},
 })
+
+require 'mini.pick'.setup()
+require("render-markdown").setup({})
+
+-- require 'mini.tabline'.setup()
 
 require("luasnip").setup({ enable_autosnippets = true })
 
@@ -83,26 +153,6 @@ if cmp_ok then
         },
         mapping = cmp.mapping.preset.insert({
             ['<CR>'] = cmp.mapping.confirm({ select = true }),
-            ['<Tab>'] = cmp.mapping(function(fallback)
-                local ls = require('luasnip')
-                if cmp.visible() then
-                    cmp.select_next_item()
-                elseif ls.expand_or_jumpable() then
-                    ls.expand_or_jump()
-                else
-                    fallback()
-                end
-            end, { 'i', 's' }),
-            ['<S-Tab>'] = cmp.mapping(function(fallback)
-                local ls = require('luasnip')
-                if cmp.visible() then
-                    cmp.select_prev_item()
-                elseif ls.jumpable(-1) then
-                    ls.jump(-1)
-                else
-                    fallback()
-                end
-            end, { 'i', 's' }),
         }),
         sources = { { name = 'nvim_lsp' } },
         completion = { completeopt = 'menuone,noinsert' },
@@ -315,14 +365,15 @@ vim.keymap.set({ "i", "s" }, "<C-J>", function() ls.jump(1) end, { silent = true
 vim.keymap.set({ "i", "s" }, "<C-K>", function() ls.jump(-1) end, { silent = true })
 
 function _G.statusline()
+    local bom = vim.bo.bomb and 'BOM' or ''
     local branch = vim.b.gitsigns_head or ''
     if branch ~= '' then
         branch = '  ' .. branch .. ' '
     end
 
+    local project = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
     local function cwd_context()
         local full = vim.fn.fnamemodify(vim.fn.getcwd(), ':~')
-        local project = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
         return string.format('[%s: %s]', project, full)
     end
 
@@ -331,8 +382,10 @@ function _G.statusline()
 
     return table.concat({
         '%f',
+        bom,
         branch,
-        cwd,
+        -- cwd,
+        project,
         '%m%r',
         '%=',
         '%l:%c',
@@ -343,6 +396,9 @@ function _G.statusline()
 end
 
 vim.opt.statusline = '%!v:lua.statusline()'
+
+vim.keymap.set('v', '<leader>y', '"*y')
+vim.keymap.set('v', '<leader>p', '"*p')
 
 vim.keymap.set('n', '<leader>gf', vim.lsp.buf.format)
 
@@ -381,6 +437,9 @@ vim.keymap.set('t', '<C-q>', [[<C-\><C-n>]])
 vim.keymap.set('n', '<leader>tn', ':tabnew<CR>')
 vim.keymap.set('n', '<leader>to', ':tabonly<CR>')
 vim.keymap.set('n', '<leader>tc', ':tabclose<CR>')
+
+vim.keymap.set("n", "<leader>fml", "<cmd>CellularAutomaton game_of_life<CR>")
+vim.keymap.set("n", "<leader>fmm", "<cmd>CellularAutomaton make_it_rain<CR>")
 
 vim.keymap.set('n', '<leader>q', function()
     local choice = vim.fn.confirm("?Wad?? u wanna Quit?", "&Yes\n&No", 2)
