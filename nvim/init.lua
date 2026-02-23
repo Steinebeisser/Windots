@@ -24,7 +24,7 @@ vim.opt.relativenumber = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
--- vim.opt.clipboard = 'unnamedplus'
+vim.opt.clipboard = 'unnamedplus'
 vim.opt.colorcolumn = '80'
 vim.opt.signcolumn = 'yes'
 vim.opt.cursorline = false
@@ -61,6 +61,28 @@ vim.cmd('syntax on')
 vim.cmd('colorscheme habamax')
 vim.cmd('filetype plugin indent on')
 vim.cmd('set tags=./tags;,tags;')
+
+vim.filetype.add {
+    extension = {
+        ebnf = "ebnf",
+    },
+}
+
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "ebnf",
+    callback = function()
+        vim.lsp.buf_attach_client(
+            0,
+            vim.lsp.start_client {
+                name = "ebnfer",
+                cmd = { "ebnfer" },
+                on_attach = on_attach,
+                capabilities = capabilities,
+            }
+        )
+    end,
+})
 
 -- local whitespace_group = vim.api.nvim_create_augroup("SmartWhitespace", { clear = true })
 
@@ -278,8 +300,11 @@ vim.lsp.config('lua_ls', {
     }
 })
 
+vim.lsp.config('protols', {
+    capabilities = capabilities
+})
 
-vim.lsp.enable({ 'roslyn' })
+vim.lsp.enable({ 'roslyn', 'protols' })
 
 vim.api.nvim_create_user_command('StartLsp', function(opts)
     local server = opts.args ~= '' and opts.args or nil
@@ -481,6 +506,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
         vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
         vim.keymap.set('i', '<C-S>', vim.lsp.buf.signature_help, opts)
+        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+        vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
+        vim.keymap.set('n', '<leader>ds', vim.lsp.buf.document_symbol, opts)
+        vim.keymap.set('n', '<leader>ws', vim.lsp.buf.workspace_symbol, opts)
 
         vim.keymap.set('n', '<leader>th', function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = args.buf }))

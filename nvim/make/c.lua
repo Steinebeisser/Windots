@@ -14,4 +14,5 @@ local function nob_makeprg()
     end
 end
 
-vim.bo.makeprg = nob_makeprg()
+vim.bo.makeprg = "make"
+-- nob_makeprg()

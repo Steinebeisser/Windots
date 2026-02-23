@@ -1,13 +1,18 @@
 [user]
     name = Paul Geisthardt
-    email = paul.geisthardt@gmx.de
-    signingkey = 84B600BF5829C049
+    email = paul.geisthardt@sinc.de
+    signingkey = 91DE296B5C3703B0
 
 [core]
     editor = nvim
     whitespace = error
     compression = 9
     preloadindex = true
+    autocrlf = true
+    fsmonitor = true
+
+[init]
+    defaulBranch = "main"
 
 [commit]
     gpgSign = true
@@ -28,7 +33,7 @@
 [pager]
     branch = false  # no need to use pager for git branch
     tag = false
-    diff = delta
+    ; diff = delta
 
 [color.decorate]
     HEAD = red
@@ -46,4 +51,18 @@
     insteadOf = "hgh"
 
 [gpg]
-    program = C:/Users/Paul/scoop/apps/gpg/current/bin/gpg.exe
+    program = C:/Users/Geisthardt/scoop/apps/gpg/current/bin/gpg.exe
+
+
+[alias]
+    stash-search = "!f() { git show $(git stash list | cut -d\":\" -f 1) | grep \"$@\" ; }; f"
+    stashgrep = "!f() { for i in `git stash list --format=\"%gd\"` ; \
+              do git stash show -p $i | grep -H --label=\"$i\" \"$@\" ; done ; }; f"
+
+[rerere]
+    enabled = true
+
+[merge]
+    conflictStyle = zdiff3
+[credential "https://tfs.sinc.de"]
+	provider = generic
