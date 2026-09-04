@@ -1,7 +1,36 @@
 " Vim syntax file
 " Language: Stein Shell Rc
 " Maintainer: Paul Geisthardt
+<<<<<<< HEAD
 " Latest Revision: 2025-09-30
+=======
+" Latest Revision: 2025-10-10
+
+" To add new known keywords with known values
+" Copy the chain pattern (Key -> Equals -> Value)
+" Exmaple using nusic keyword with known values: Gareth Coker, Howard Jones
+" and Nerdout
+"
+" (Set)
+" Add the key match group to stein_shellrcSet
+"
+" (KEY)
+" syntax match stein_shellrcMusicKey /music/ contained nextgroup=stein_shellrcMusicEquals skipwhite
+" highlight link stein_shellrcMusicKey Type
+"
+" (EQUALS)
+" syntax match stein_shellrcMusicEquals /=/ contained nextgroup=stein_shellrcMusicValue skipwhite
+" highlight link stein_shellrcMusicEquals Operator
+"
+" (VALUE)
+" Here because we have mutli character values we must use regex, else we could
+" use keyword to match single word values
+" syntax match stein_shellrcMusicValue /\v(Gareth Coker|Howard Jones|Nerdout)/ contained
+" highlight link stein_shellrcMusicValue Constant
+"
+" Example Value with Keyword
+" syntax keyword sten_shellrcMusicValue GarethCoker HowardJones Nerdout contained
+>>>>>>> 0e5e3d4 (stuff)
 
 if exists("b:current_syntax")
   finish
@@ -12,9 +41,23 @@ syntax keyword stein_shellrcset set
       \ nextgroup=stein_shellrcmodifier
       \           ,stein_shellrccolorkey
       \           ,stein_shellrcpromptkey
+<<<<<<< HEAD
       \           ,stein_shellrctimekey
       \           ,stein_shellrcshowcmdpathkey
       \           ,stein_shellrcshowexpandedkey
+=======
+      \           ,stein_shellrcmusickey
+      \           ,stein_shellrctimekey
+      \           ,stein_shellrcshowcmdpathkey
+      \           ,stein_shellrcshowexpandedkey
+      \           ,stein_shellrcshowexitkey
+      \           ,stein_shellrcshowenvoverridekey
+      \           ,stein_shellrcterminalmodekey
+      \           ,stein_shellrchistoryfilekey
+      \           ,stein_shellrchistorykey
+      \           ,stein_shellrchistorylenkey
+      \           ,stein_shellrchistoryfilepathkey
+>>>>>>> 0e5e3d4 (stuff)
       \ skipwhite
 highlight link stein_shellrcset keyword
 
@@ -32,9 +75,27 @@ highlight link stein_shellrcaliasname define
 syntax match stein_shellrcaliasequals /=/ contained nextgroup=stein_shellrcaliasvalue skipwhite
 highlight link stein_shellrcaliasequals operator
 
+<<<<<<< HEAD
 syntax match stein_shellrcaliasvalue /.*$/ contained contains=stein_shellrcstring
 highlight link stein_shellrcaliasvalue special
 
+=======
+syntax match stein_shellrcaliasvalue /.*$/ contained
+highlight link stein_shellrcaliasvalue special
+
+
+syntax match stein_shellrcmodifier /(env)/ contained nextgroup=stein_shellrcenvname skipwhite
+
+syntax match stein_shellrcenvname /\w\+/ contained nextgroup=stein_shellrcenvquals skipwhite
+highlight link stein_shellrcenvname define
+
+syntax match stein_shellrcenvquals /=/ contained nextgroup=stein_shellrcenvvalue skipwhite
+highlight link stein_shellrcenvquals operator
+
+syntax match stein_shellrcenvvalue /.*$/ contained
+highlight link stein_shellrcenvvalue special
+
+>>>>>>> 0e5e3d4 (stuff)
 " ----- color keys chain -----
 syntax match stein_shellrccolorkey /\v<(
       \info_color
@@ -113,6 +174,80 @@ highlight link stein_shellrcshowexpandedequals Operator
 syntax match stein_shellrcshowexpandedvalue /\v(1|0|true|false)/ contained
 highlight link stein_shellrcshowexpandedvalue Constant
 
+<<<<<<< HEAD
+=======
+" ----- exit_code key chain -----
+syntax match stein_shellrcshowexitkey /\<show_exit_code\>/ contained nextgroup=stein_shellrcshowexitequals skipwhite
+highlight link stein_shellrcshowexitkey Type
+
+syntax match stein_shellrcshowexitequals /=/ contained nextgroup=stein_shellrcshowexitvalue skipwhite
+highlight link stein_shellrcshowexitequals Operator
+
+syntax match stein_shellrcshowexitvalue /\v(1|0|true|false)/ contained
+highlight link stein_shellrcshowexitvalue Constant
+
+" ----- allow_env_override key chain -----
+syntax match stein_shellrcshowenvoverridekey /\<allow_env_override\>/ contained nextgroup=stein_shellrcshowenvoverrideequals skipwhite
+highlight link stein_shellrcshowenvoverridekey Type
+
+syntax match stein_shellrcshowenvoverrideequals /=/ contained nextgroup=stein_shellrcshowenvoverridevalue skipwhite
+highlight link stein_shellrcshowenvoverrideequals Operator
+
+syntax match stein_shellrcshowenvoverridevalue /\v(1|0|true|false)/ contained
+highlight link stein_shellrcshowenvoverridevalue Constant
+
+" ----- terminal key chain -----
+syntax match stein_shellrcterminalmodekey /\<terminal_mode\>/ contained nextgroup=stein_shellrcterminalmodeequals skipwhite
+highlight link stein_shellrcterminalmodekey Type
+
+syntax match stein_shellrcterminalmodeequals /=/ contained nextgroup=stein_shellrcterminalmodevalue skipwhite
+highlight link stein_shellrcterminalmodeequals Operator
+
+syntax match stein_shellrcterminalmodevalue /\v(normal|vi|emacs)/ contained
+highlight link stein_shellrcterminalmodevalue Constant
+
+" ----- historyfile key chain -----
+syntax match stein_shellrchistoryfilekey /\<enable_history_file\>/ contained nextgroup=stein_shellrchistoryfileequals skipwhite
+highlight link stein_shellrchistoryfilekey Type
+
+syntax match stein_shellrchistoryfileequals /=/ contained nextgroup=stein_shellrchistoryfilevalue skipwhite
+highlight link stein_shellrchistoryfileequals Operator
+
+syntax match stein_shellrchistoryfilevalue /\v(1|0|true|false)/ contained
+highlight link stein_shellrchistoryfilevalue Constant
+
+" ----- history key chain -----
+syntax match stein_shellrchistorykey /\<enable_history\>/ contained nextgroup=stein_shellrchistoryequals skipwhite
+highlight link stein_shellrchistorykey Type
+
+syntax match stein_shellrchistoryequals /=/ contained nextgroup=stein_shellrchistoryvalue skipwhite
+highlight link stein_shellrchistoryequals Operator
+
+syntax match stein_shellrchistoryvalue /\v(1|0|true|false)/ contained
+highlight link stein_shellrchistoryvalue Constant
+
+" ----- historylen key chain -----
+syntax match stein_shellrchistorylenkey /\<max_history_len\>/ contained nextgroup=stein_shellrchistorylenequals skipwhite
+highlight link stein_shellrchistorylenkey Type
+
+syntax match stein_shellrchistorylenequals /=/ contained nextgroup=stein_shellrchistorylenvalue skipwhite
+highlight link stein_shellrchistorylenequals Operator
+
+syntax match stein_shellrchistorylenvalue /\d\+/ contained
+highlight link stein_shellrchistorylenvalue Constant
+
+
+" ----- historyfilepath key chain -----
+syntax match stein_shellrchistoryfilepathkey /\<history_file\>/ contained nextgroup=stein_shellrchistoryfilepathequals skipwhite
+highlight link stein_shellrchistoryfilepathkey Type
+
+syntax match stein_shellrchistoryfilepathequals /=/ contained nextgroup=stein_shellrchistoryfilepathvalue skipwhite
+highlight link stein_shellrchistoryfilepathequals Operator
+
+syntax match stein_shellrchistoryfilepathvalue /.*$/ contained
+highlight link stein_shellrchistoryfilepathvalue special
+
+>>>>>>> 0e5e3d4 (stuff)
 " ----- comments -----
 syntax match stein_shellrccomment /:.*$/ containedin=ALL
 highlight link stein_shellrccomment Comment

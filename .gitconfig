@@ -1,7 +1,7 @@
 [user]
     name = Paul Geisthardt
-    email = paul.geisthardt@sinc.de
-    signingkey = 91DE296B5C3703B0
+    email = paul.geisthardt@gmx.de
+    signingkey = 84B600BF5829C049
 
 [core]
     editor = nvim
@@ -51,7 +51,7 @@
     insteadOf = "hgh"
 
 [gpg]
-    program = C:/Users/Geisthardt/scoop/apps/gpg/current/bin/gpg.exe
+    program = C:/Users/Paul/scoop/apps/gpg/current/bin/gpg.exe
 
 
 [alias]
